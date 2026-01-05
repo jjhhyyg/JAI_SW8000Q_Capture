@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QSlider, QPushButton, QComboBox, QLineEdit
 )
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QDoubleValidator, QIntValidator
 
 import sys
 import os
@@ -47,12 +48,11 @@ class ControlPanel(QWidget):
         # 曝光时间
         exposure_layout.addWidget(QLabel("曝光时间 (µs):"), 0, 0)
 
-        self._exposure_spinbox = QDoubleSpinBox()
-        self._exposure_spinbox.setRange(1, 1000000)
-        self._exposure_spinbox.setDecimals(1)
-        self._exposure_spinbox.setSingleStep(100)
-        self._exposure_spinbox.setValue(1000)
-        exposure_layout.addWidget(self._exposure_spinbox, 0, 1)
+        self._exposure_edit = QLineEdit()
+        self._exposure_edit.setValidator(QDoubleValidator(1, 1000000, 1))
+        self._exposure_edit.setText("1000")
+        self._exposure_edit.setFixedWidth(80)
+        exposure_layout.addWidget(self._exposure_edit, 0, 1)
 
         self._exposure_slider = QSlider(Qt.Horizontal)
         self._exposure_slider.setRange(1, 100000)
@@ -68,12 +68,11 @@ class ControlPanel(QWidget):
         # 增益
         gain_layout.addWidget(QLabel("增益 (dB):"), 0, 0)
 
-        self._gain_spinbox = QDoubleSpinBox()
-        self._gain_spinbox.setRange(0, 36)
-        self._gain_spinbox.setDecimals(1)
-        self._gain_spinbox.setSingleStep(1)
-        self._gain_spinbox.setValue(0)
-        gain_layout.addWidget(self._gain_spinbox, 0, 1)
+        self._gain_edit = QLineEdit()
+        self._gain_edit.setValidator(QDoubleValidator(0, 36, 1))
+        self._gain_edit.setText("0")
+        self._gain_edit.setFixedWidth(80)
+        gain_layout.addWidget(self._gain_edit, 0, 1)
 
         self._gain_slider = QSlider(Qt.Horizontal)
         self._gain_slider.setRange(0, 360)  # 0.1 dB 精度
@@ -81,6 +80,26 @@ class ControlPanel(QWidget):
         gain_layout.addWidget(self._gain_slider, 1, 0, 1, 2)
 
         main_layout.addWidget(gain_group)
+
+        # 行频控制组
+        line_rate_group = QGroupBox("行频控制")
+        line_rate_layout = QGridLayout(line_rate_group)
+
+        # 行频
+        line_rate_layout.addWidget(QLabel("行频 (Hz):"), 0, 0)
+
+        self._line_rate_edit = QLineEdit()
+        self._line_rate_edit.setValidator(QIntValidator(1, 100000))
+        self._line_rate_edit.setText("10000")
+        self._line_rate_edit.setFixedWidth(80)
+        line_rate_layout.addWidget(self._line_rate_edit, 0, 1)
+
+        self._line_rate_slider = QSlider(Qt.Horizontal)
+        self._line_rate_slider.setRange(1, 100000)
+        self._line_rate_slider.setValue(10000)
+        line_rate_layout.addWidget(self._line_rate_slider, 1, 0, 1, 2)
+
+        main_layout.addWidget(line_rate_group)
 
         # 图像尺寸控制组
         size_group = QGroupBox("图像尺寸")
@@ -124,12 +143,16 @@ class ControlPanel(QWidget):
     def _connect_signals(self):
         """连接信号"""
         # 曝光时间
-        self._exposure_spinbox.valueChanged.connect(self._on_exposure_spinbox_changed)
+        self._exposure_edit.editingFinished.connect(self._on_exposure_edit_changed)
         self._exposure_slider.valueChanged.connect(self._on_exposure_slider_changed)
 
         # 增益
-        self._gain_spinbox.valueChanged.connect(self._on_gain_spinbox_changed)
+        self._gain_edit.editingFinished.connect(self._on_gain_edit_changed)
         self._gain_slider.valueChanged.connect(self._on_gain_slider_changed)
+
+        # 行频
+        self._line_rate_edit.editingFinished.connect(self._on_line_rate_edit_changed)
+        self._line_rate_slider.valueChanged.connect(self._on_line_rate_slider_changed)
 
         # 图像尺寸
         self._apply_size_button.clicked.connect(self._on_apply_size)
@@ -137,20 +160,22 @@ class ControlPanel(QWidget):
         # 刷新
         self._refresh_button.clicked.connect(self.refresh_parameters)
 
-    def _on_exposure_spinbox_changed(self, value: float):
-        """曝光时间 spinbox 改变"""
-        self._exposure_slider.blockSignals(True)
-        self._exposure_slider.setValue(int(value))
-        self._exposure_slider.blockSignals(False)
-
-        self._apply_exposure(value)
+    def _on_exposure_edit_changed(self):
+        """曝光时间输入框改变"""
+        try:
+            value = float(self._exposure_edit.text())
+            self._exposure_slider.blockSignals(True)
+            self._exposure_slider.setValue(int(value))
+            self._exposure_slider.blockSignals(False)
+            self._apply_exposure(value)
+        except ValueError:
+            pass
 
     def _on_exposure_slider_changed(self, value: int):
         """曝光时间 slider 改变"""
-        self._exposure_spinbox.blockSignals(True)
-        self._exposure_spinbox.setValue(float(value))
-        self._exposure_spinbox.blockSignals(False)
-
+        self._exposure_edit.blockSignals(True)
+        self._exposure_edit.setText(str(value))
+        self._exposure_edit.blockSignals(False)
         self._apply_exposure(float(value))
 
     def _apply_exposure(self, value: float):
@@ -160,21 +185,23 @@ class ControlPanel(QWidget):
             if success:
                 self.parameter_changed.emit("ExposureTime", value)
 
-    def _on_gain_spinbox_changed(self, value: float):
-        """增益 spinbox 改变"""
-        self._gain_slider.blockSignals(True)
-        self._gain_slider.setValue(int(value * 10))
-        self._gain_slider.blockSignals(False)
-
-        self._apply_gain(value)
+    def _on_gain_edit_changed(self):
+        """增益输入框改变"""
+        try:
+            value = float(self._gain_edit.text())
+            self._gain_slider.blockSignals(True)
+            self._gain_slider.setValue(int(value * 10))
+            self._gain_slider.blockSignals(False)
+            self._apply_gain(value)
+        except ValueError:
+            pass
 
     def _on_gain_slider_changed(self, value: int):
         """增益 slider 改变"""
         gain_value = value / 10.0
-        self._gain_spinbox.blockSignals(True)
-        self._gain_spinbox.setValue(gain_value)
-        self._gain_spinbox.blockSignals(False)
-
+        self._gain_edit.blockSignals(True)
+        self._gain_edit.setText(f"{gain_value:.1f}")
+        self._gain_edit.blockSignals(False)
         self._apply_gain(gain_value)
 
     def _apply_gain(self, value: float):
@@ -183,6 +210,31 @@ class ControlPanel(QWidget):
             success = self.device_manager.set_gain(value)
             if success:
                 self.parameter_changed.emit("Gain", value)
+
+    def _on_line_rate_edit_changed(self):
+        """行频输入框改变"""
+        try:
+            value = int(self._line_rate_edit.text())
+            self._line_rate_slider.blockSignals(True)
+            self._line_rate_slider.setValue(value)
+            self._line_rate_slider.blockSignals(False)
+            self._apply_line_rate(value)
+        except ValueError:
+            pass
+
+    def _on_line_rate_slider_changed(self, value: int):
+        """行频 slider 改变"""
+        self._line_rate_edit.blockSignals(True)
+        self._line_rate_edit.setText(str(value))
+        self._line_rate_edit.blockSignals(False)
+        self._apply_line_rate(value)
+
+    def _apply_line_rate(self, value: int):
+        """应用行频"""
+        if self.device_manager.is_connected:
+            success = self.device_manager.set_acquisition_line_rate(value)
+            if success:
+                self.parameter_changed.emit("AcquisitionLineRate", value)
 
     def _on_apply_size(self):
         """应用图像尺寸"""
@@ -205,28 +257,50 @@ class ControlPanel(QWidget):
         # 读取曝光时间
         success, exposure = self.device_manager.get_exposure_time()
         if success and exposure is not None:
-            self._exposure_spinbox.blockSignals(True)
+            self._exposure_edit.blockSignals(True)
             self._exposure_slider.blockSignals(True)
-            self._exposure_spinbox.setValue(exposure)
+            self._exposure_edit.setText(str(int(exposure)))
             self._exposure_slider.setValue(int(exposure))
-            self._exposure_spinbox.blockSignals(False)
+            self._exposure_edit.blockSignals(False)
             self._exposure_slider.blockSignals(False)
 
             # 更新范围
             info = self.device_manager.get_parameter_info("ExposureTime")
             if info and info.min_val is not None and info.max_val is not None:
-                self._exposure_spinbox.setRange(info.min_val, info.max_val)
+                self._exposure_edit.setValidator(QDoubleValidator(info.min_val, info.max_val, 1))
                 self._exposure_slider.setRange(int(info.min_val), min(int(info.max_val), 100000))
 
         # 读取增益
         success, gain = self.device_manager.get_gain()
         if success and gain is not None:
-            self._gain_spinbox.blockSignals(True)
+            self._gain_edit.blockSignals(True)
             self._gain_slider.blockSignals(True)
-            self._gain_spinbox.setValue(gain)
+            self._gain_edit.setText(f"{gain:.1f}")
             self._gain_slider.setValue(int(gain * 10))
-            self._gain_spinbox.blockSignals(False)
+            self._gain_edit.blockSignals(False)
             self._gain_slider.blockSignals(False)
+
+            # 更新范围
+            info = self.device_manager.get_parameter_info("Gain")
+            if info and info.min_val is not None and info.max_val is not None:
+                self._gain_edit.setValidator(QDoubleValidator(info.min_val, info.max_val, 1))
+                self._gain_slider.setRange(int(info.min_val * 10), int(info.max_val * 10))
+
+        # 读取行频
+        success, line_rate = self.device_manager.get_acquisition_line_rate()
+        if success and line_rate is not None:
+            self._line_rate_edit.blockSignals(True)
+            self._line_rate_slider.blockSignals(True)
+            self._line_rate_edit.setText(str(int(line_rate)))
+            self._line_rate_slider.setValue(int(line_rate))
+            self._line_rate_edit.blockSignals(False)
+            self._line_rate_slider.blockSignals(False)
+
+            # 更新范围
+            info = self.device_manager.get_parameter_info("AcquisitionLineRate")
+            if info and info.min_val is not None and info.max_val is not None:
+                self._line_rate_edit.setValidator(QIntValidator(int(info.min_val), int(info.max_val)))
+                self._line_rate_slider.setRange(int(info.min_val), min(int(info.max_val), 100000))
 
         # 读取图像尺寸
         width, height = self.device_manager.get_image_size()
@@ -251,10 +325,12 @@ class ControlPanel(QWidget):
 
     def set_enabled(self, enabled: bool):
         """设置控件是否可用"""
-        self._exposure_spinbox.setEnabled(enabled)
+        self._exposure_edit.setEnabled(enabled)
         self._exposure_slider.setEnabled(enabled)
-        self._gain_spinbox.setEnabled(enabled)
+        self._gain_edit.setEnabled(enabled)
         self._gain_slider.setEnabled(enabled)
+        self._line_rate_edit.setEnabled(enabled)
+        self._line_rate_slider.setEnabled(enabled)
         self._width_spinbox.setEnabled(enabled)
         self._height_spinbox.setEnabled(enabled)
         self._apply_size_button.setEnabled(enabled)

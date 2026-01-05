@@ -412,6 +412,14 @@ class DeviceManager:
             success = self.set_parameter("GainRaw", int(value))
         return success
 
+    def get_acquisition_line_rate(self) -> Tuple[bool, float]:
+        """获取行频（Hz）"""
+        return self.get_parameter("AcquisitionLineRate")
+
+    def set_acquisition_line_rate(self, value: int) -> bool:
+        """设置行频（Hz）"""
+        return self.set_parameter("AcquisitionLineRate", value)
+
     def get_device_info_string(self) -> str:
         """获取设备信息字符串"""
         if not self.is_connected:
