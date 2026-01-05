@@ -19,6 +19,13 @@ env/
 build/
 dist/
 *.egg-info/
+main.build/
+main.dist/
+main.spec
+
+# Installer
+dependencies/
+JAI_SW8000Q_Capture_Setup.exe
 
 # Saved images
 saved_images/
