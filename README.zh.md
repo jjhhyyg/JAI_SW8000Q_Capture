@@ -85,6 +85,45 @@ SW-8000Q 是一款四棱镜线扫相机，具有以下特点:
 - 可配置的显示帧率限制 (默认 15 FPS)，减少 GUI 开销
 - 始终保留最新帧用于拍照操作
 
+## 构建安装程序
+
+### 前置条件
+
+1. [NSIS](https://nsis.sourceforge.io/) (Nullsoft Scriptable Install System)
+2. [Nuitka](https://nuitka.net/) 或 PyInstaller 用于创建 `main.dist/` 文件夹
+3. eBUS SDK 安装程序放置在 `dependencies/` 文件夹中
+
+### 构建步骤
+
+1. 编译 Python 应用程序:
+```bash
+nuitka --standalone --enable-plugin=pyside6 main.py
+```
+
+2. 将 eBUS SDK 安装程序放入 `dependencies/` 文件夹:
+```
+dependencies/eBUS SDK 64-bit for JAI.6.5.3.7155.exe
+```
+
+3. 构建安装程序:
+```batch
+build_installer.bat
+```
+或手动执行:
+```batch
+makensis installer.nsi
+```
+
+4. 输出文件: `JAI_SW8000Q_Capture_Setup.exe`
+
+### 安装程序功能
+
+- 检测 eBUS SDK 是否已安装 (通过 `PUREGEV_ROOT` 环境变量)
+- 如未安装则提示安装 SDK
+- 可选的桌面快捷方式
+- 开始菜单快捷方式
+- 完整的卸载支持
+
 ## 许可证
 
 本项目作为 eBUS SDK 示例程序提供。

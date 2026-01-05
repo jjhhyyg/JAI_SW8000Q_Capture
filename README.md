@@ -85,6 +85,45 @@ The application configures the camera's Transport Layer to send:
 - Configurable display frame rate limiting (default 15 FPS) to reduce GUI overhead
 - Latest frames always retained for capture operations
 
+## Building Installer
+
+### Prerequisites
+
+1. [NSIS](https://nsis.sourceforge.io/) (Nullsoft Scriptable Install System)
+2. [Nuitka](https://nuitka.net/) or PyInstaller to create `main.dist/` folder
+3. eBUS SDK installer in `dependencies/` folder
+
+### Build Steps
+
+1. Compile the Python application:
+```bash
+nuitka --standalone --enable-plugin=pyside6 main.py
+```
+
+2. Place the eBUS SDK installer in `dependencies/` folder:
+```
+dependencies/eBUS SDK 64-bit for JAI.6.5.3.7155.exe
+```
+
+3. Build the installer:
+```batch
+build_installer.bat
+```
+Or manually:
+```batch
+makensis installer.nsi
+```
+
+4. Output: `JAI_SW8000Q_Capture_Setup.exe`
+
+### Installer Features
+
+- Checks for eBUS SDK installation (via `PUREGEV_ROOT` environment variable)
+- Prompts to install SDK if not found
+- Optional desktop shortcut
+- Start Menu shortcuts
+- Full uninstall support
+
 ## License
 
 This project is provided as a sample application for eBUS SDK.

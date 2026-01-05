@@ -1,4 +1,4 @@
-; JAI SW-8000Q Capture - NSIS Installer Script
+﻿; JAI SW-8000Q Capture - NSIS Installer Script
 ; Requires NSIS 3.x
 
 ;--------------------------------
@@ -21,11 +21,12 @@ Unicode True
 ; Version Info
 VIProductVersion "1.0.0.0"
 VIAddVersionKey "ProductName" "JAI SW-8000Q Capture"
-VIAddVersionKey "CompanyName" "Photometric Stereo"
+VIAddVersionKey "CompanyName" "USTB MVIT Group"
+VIAddVersionKey "Authors" "HOU YANGYANG"
 VIAddVersionKey "FileDescription" "JAI SW-8000Q 4-CMOS Camera Capture Software"
 VIAddVersionKey "FileVersion" "1.0.0"
 VIAddVersionKey "ProductVersion" "1.0.0"
-VIAddVersionKey "LegalCopyright" "Copyright (c) 2024"
+VIAddVersionKey "LegalCopyright" "Copyright (c) 2026"
 
 ;--------------------------------
 ; Variables
@@ -187,7 +188,7 @@ Section "JAI SW-8000Q Capture" SecMain
 
 SectionEnd
 
-Section /o "Desktop Shortcut" SecDesktop
+Section "Desktop Shortcut" SecDesktop
     ; Optional desktop shortcut section (unchecked by default, use without /o to check by default)
     CreateShortcut "$DESKTOP\JAI SW-8000Q-10GE 多通道采集程序.lnk" "$INSTDIR\main.exe"
 SectionEnd
