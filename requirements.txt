@@ -1,0 +1,9 @@
+# JAI SW-8000Q Capture - Python Dependencies
+#
+# Note: ebus-python is not available on PyPI.
+# It must be installed from the eBUS SDK (Pleora).
+# Download from: https://www.pleora.com/products/ebus-sdk/
+
+numpy>=1.26.4
+opencv-python>=4.11.0.86
+PySide6>=6.10.1
