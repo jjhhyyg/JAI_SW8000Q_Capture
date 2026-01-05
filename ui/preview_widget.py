@@ -205,6 +205,7 @@ class ChannelPreviewWidget(PreviewWidget):
     单通道预览组件
 
     继承自 PreviewWidget，添加通道颜色标识
+    R/G/B 通道以对应颜色显示，NIR 以灰度显示
     """
 
     CHANNEL_COLORS = {
@@ -235,3 +236,54 @@ class ChannelPreviewWidget(PreviewWidget):
     @property
     def channel_name(self) -> str:
         return self._channel_name
+
+    def _colorize_channel(self, data: np.ndarray) -> np.ndarray:
+        """
+        将灰度数据转换为对应通道颜色
+
+        Args:
+            data: 灰度图像数据 (H, W)
+
+        Returns:
+            彩色图像数据 (H, W, 3)
+        """
+        if data is None or len(data.shape) != 2:
+            return data
+
+        h, w = data.shape
+        colored = np.zeros((h, w, 3), dtype=np.uint8)
+
+        channel = self._channel_name.upper()
+        if channel == 'R':
+            colored[:, :, 0] = data  # Red channel
+        elif channel == 'G':
+            colored[:, :, 1] = data  # Green channel
+        elif channel == 'B':
+            colored[:, :, 2] = data  # Blue channel
+        else:
+            # NIR and others: return original grayscale
+            return data
+
+        return colored
+
+    def update_image(self, data: np.ndarray):
+        """
+        更新显示的图像
+
+        R/G/B 通道以对应颜色显示，NIR 以灰度显示
+
+        Args:
+            data: NumPy 数组，灰度图 (H, W)
+        """
+        if data is None or data.size == 0:
+            self._show_placeholder()
+            return
+
+        # 对 R/G/B 通道进行着色
+        channel = self._channel_name.upper()
+        if channel in ['R', 'G', 'B'] and len(data.shape) == 2:
+            colored_data = self._colorize_channel(data)
+            super().update_image(colored_data)
+        else:
+            # NIR 保持灰度显示
+            super().update_image(data)
