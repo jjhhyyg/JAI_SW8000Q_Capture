@@ -47,6 +47,7 @@ Var SDK_INSTALLER_PATH
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "README.md"
 !insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 
@@ -181,12 +182,14 @@ Section "JAI SW-8000Q Capture" SecMain
 
     ; Create Start Menu shortcuts
     CreateDirectory "$SMPROGRAMS\JAI SW-8000Q Capture"
-    CreateShortcut "$SMPROGRAMS\JAI SW-8000Q Capture\JAI SW-8000Q Capture.lnk" "$INSTDIR\main.exe"
+    CreateShortcut "$SMPROGRAMS\JAI SW-8000Q Capture\JAI SW-8000Q-10GE 多通道采集程序.lnk" "$INSTDIR\main.exe"
     CreateShortcut "$SMPROGRAMS\JAI SW-8000Q Capture\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
 
-    ; Create Desktop shortcut
-    CreateShortcut "$DESKTOP\JAI SW-8000Q Capture.lnk" "$INSTDIR\main.exe"
+SectionEnd
 
+Section /o "Desktop Shortcut" SecDesktop
+    ; Optional desktop shortcut section (unchecked by default, use without /o to check by default)
+    CreateShortcut "$DESKTOP\JAI SW-8000Q-10GE 多通道采集程序.lnk" "$INSTDIR\main.exe"
 SectionEnd
 
 ;--------------------------------
@@ -195,6 +198,7 @@ SectionEnd
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSDK} "eBUS SDK for JAI (required for camera communication)"
     !insertmacro MUI_DESCRIPTION_TEXT ${SecMain} "JAI SW-8000Q Capture application files"
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecDesktop} "Create a shortcut on the desktop"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;--------------------------------
@@ -209,8 +213,8 @@ Section "Uninstall"
     ; Remove Start Menu shortcuts
     RMDir /r "$SMPROGRAMS\JAI SW-8000Q Capture"
 
-    ; Remove Desktop shortcut
-    Delete "$DESKTOP\JAI SW-8000Q Capture.lnk"
+    ; Remove Desktop shortcut (if exists)
+    Delete "$DESKTOP\JAI SW-8000Q-10GE 多通道采集程序.lnk"
 
     ; Remove registry keys
     DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\JAI SW-8000Q Capture"
