@@ -4,6 +4,6 @@
 # It must be installed from the eBUS SDK (Pleora).
 # Download from: https://www.pleora.com/products/ebus-sdk/
 
-numpy>=1.26.4
-opencv-python>=4.11.0.86
+numpy>=1.26.4,<2.0.0
+opencv-python>=4.11.0.86,<4.12.0.88
 PySide6>=6.10.1
