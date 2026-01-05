@@ -90,12 +90,12 @@ class ImageSaver:
         """
         保存拍照图像
 
-        保存文件:
-        - {timestamp}_full_rgb.png     # 全通道 RGB
-        - {timestamp}_channel_r.png    # R 通道
-        - {timestamp}_channel_g.png    # G 通道
-        - {timestamp}_channel_b.png    # B 通道
-        - {timestamp}_channel_nir.png  # NIR 通道（如果有）
+        保存到文件夹: 5_channels_{timestamp}/
+        - full_rgb.png     # 全通道 RGB
+        - channel_r.png    # R 通道
+        - channel_g.png    # G 通道
+        - channel_b.png    # B 通道
+        - channel_nir.png  # NIR 通道（如果有）
 
         Args:
             rgb_data: RGB 图像数据 (H, W, 3)
@@ -116,6 +116,10 @@ class ImageSaver:
         if timestamp is None:
             timestamp = self._generate_timestamp()
 
+        # 创建以时间戳命名的子文件夹
+        capture_dir = os.path.join(self._save_dir, f"5_channels_{timestamp}")
+        os.makedirs(capture_dir, exist_ok=True)
+
         saved_files = []
 
         # 确保数据类型正确
@@ -123,7 +127,7 @@ class ImageSaver:
             rgb_data = rgb_data.astype(np.uint8)
 
         # 保存全通道 RGB
-        rgb_path = os.path.join(self._save_dir, f"{timestamp}_full_rgb.png")
+        rgb_path = os.path.join(capture_dir, "full_rgb.png")
         # OpenCV 使用 BGR 格式，需要转换
         if len(rgb_data.shape) == 3 and rgb_data.shape[2] == 3:
             bgr_data = cv2.cvtColor(rgb_data, cv2.COLOR_RGB2BGR)
@@ -136,17 +140,17 @@ class ImageSaver:
         r, g, b = split_rgb_channels(rgb_data)
 
         if r is not None:
-            r_path = os.path.join(self._save_dir, f"{timestamp}_channel_r.png")
+            r_path = os.path.join(capture_dir, "channel_r.png")
             cv2.imwrite(r_path, r)
             saved_files.append(r_path)
 
         if g is not None:
-            g_path = os.path.join(self._save_dir, f"{timestamp}_channel_g.png")
+            g_path = os.path.join(capture_dir, "channel_g.png")
             cv2.imwrite(g_path, g)
             saved_files.append(g_path)
 
         if b is not None:
-            b_path = os.path.join(self._save_dir, f"{timestamp}_channel_b.png")
+            b_path = os.path.join(capture_dir, "channel_b.png")
             cv2.imwrite(b_path, b)
             saved_files.append(b_path)
 
@@ -155,7 +159,7 @@ class ImageSaver:
             if nir_data.dtype != np.uint8:
                 nir_data = nir_data.astype(np.uint8)
 
-            nir_path = os.path.join(self._save_dir, f"{timestamp}_channel_nir.png")
+            nir_path = os.path.join(capture_dir, "channel_nir.png")
             cv2.imwrite(nir_path, nir_data)
             saved_files.append(nir_path)
 
