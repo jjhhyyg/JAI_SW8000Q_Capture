@@ -88,8 +88,3 @@ The application configures the camera's Transport Layer to send:
 ## License
 
 This project is provided as a sample application for eBUS SDK.
-
-## Acknowledgments
-
-- [Pleora Technologies](https://www.pleora.com/) for the eBUS SDK
-- [JAI](https://www.jai.com/) for the SW-8000Q camera

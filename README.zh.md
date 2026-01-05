@@ -88,8 +88,3 @@ SW-8000Q 是一款四棱镜线扫相机，具有以下特点:
 ## 许可证
 
 本项目作为 eBUS SDK 示例程序提供。
-
-## 致谢
-
-- [Pleora Technologies](https://www.pleora.com/) 提供 eBUS SDK
-- [JAI](https://www.jai.com/) 提供 SW-8000Q 相机

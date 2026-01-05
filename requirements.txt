@@ -2,7 +2,7 @@
 #
 # Note: ebus-python is not available on PyPI.
 # It must be installed from the eBUS SDK (Pleora).
-# Download from: https://www.pleora.com/products/ebus-sdk/
+# Download from: https://www.jai.com/support-software/jai-software/
 
 numpy>=1.26.4,<2.0.0
 opencv-python>=4.11.0.86,<4.12.0.88
