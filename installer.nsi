@@ -159,19 +159,22 @@ Section "JAI SW-8000Q Capture" SecMain
     ; Install all files from main.dist
     File /r "main.dist\*.*"
 
+    ; Install application icon
+    File "icon.ico"
+
     ; Create uninstaller
-    WriteUninstaller "$INSTDIR\Uninstall.exe"
+    WriteUninstaller "$INSTDIR\卸载JAI SW8000Q 采集程序.exe"
 
     ; Write registry keys
     WriteRegStr HKLM "Software\JAI SW-8000Q Capture" "InstallDir" "$INSTDIR"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\JAI SW-8000Q Capture" \
         "DisplayName" "JAI SW-8000Q Capture"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\JAI SW-8000Q Capture" \
-        "UninstallString" "$INSTDIR\Uninstall.exe"
+        "UninstallString" '"$INSTDIR\卸载JAI SW8000Q 采集程序.exe"'
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\JAI SW-8000Q Capture" \
         "InstallLocation" "$INSTDIR"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\JAI SW-8000Q Capture" \
-        "DisplayIcon" "$INSTDIR\main.exe"
+        "DisplayIcon" "$INSTDIR\icon.ico"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\JAI SW-8000Q Capture" \
         "Publisher" "Photometric Stereo"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\JAI SW-8000Q Capture" \
@@ -181,16 +184,16 @@ Section "JAI SW-8000Q Capture" SecMain
     WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\JAI SW-8000Q Capture" \
         "NoRepair" 1
 
-    ; Create Start Menu shortcuts
+    ; Create Start Menu shortcuts (with icon)
     CreateDirectory "$SMPROGRAMS\JAI SW-8000Q Capture"
-    CreateShortcut "$SMPROGRAMS\JAI SW-8000Q Capture\JAI SW-8000Q-10GE 多通道采集程序.lnk" "$INSTDIR\main.exe"
-    CreateShortcut "$SMPROGRAMS\JAI SW-8000Q Capture\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
+    CreateShortcut "$SMPROGRAMS\JAI SW-8000Q Capture\JAI SW-8000Q-10GE 多通道采集程序.lnk" "$INSTDIR\main.exe" "" "$INSTDIR\icon.ico"
+    CreateShortcut "$SMPROGRAMS\JAI SW-8000Q Capture\卸载JAI SW8000Q 采集程序.lnk" "$INSTDIR\卸载JAI SW8000Q 采集程序.exe"
 
 SectionEnd
 
 Section "Desktop Shortcut" SecDesktop
     ; Optional desktop shortcut section (unchecked by default, use without /o to check by default)
-    CreateShortcut "$DESKTOP\JAI SW-8000Q-10GE 多通道采集程序.lnk" "$INSTDIR\main.exe"
+    CreateShortcut "$DESKTOP\JAI SW-8000Q-10GE 多通道采集程序.lnk" "$INSTDIR\main.exe" "" "$INSTDIR\icon.ico"
 SectionEnd
 
 ;--------------------------------
@@ -208,7 +211,7 @@ SectionEnd
 Section "Uninstall"
     SetRegView 64
 
-    ; Remove files
+    ; Remove files (including icon.ico and uninstaller)
     RMDir /r "$INSTDIR"
 
     ; Remove Start Menu shortcuts
