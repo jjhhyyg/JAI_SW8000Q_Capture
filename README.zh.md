@@ -97,7 +97,7 @@ SW-8000Q 是一款四棱镜线扫相机，具有以下特点:
 
 1. 编译 Python 应用程序:
 ```bash
-nuitka --standalone --enable-plugin=pyside6 main.py
+python -m nuitka --standalone --show-progress --windows-console-mode=disable --plugin-enable=pyside6 --follow-imports main.py
 ```
 
 2. 将 eBUS SDK 安装程序放入 `dependencies/` 文件夹:

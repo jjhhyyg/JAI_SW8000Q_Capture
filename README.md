@@ -97,7 +97,7 @@ The application configures the camera's Transport Layer to send:
 
 1. Compile the Python application:
 ```bash
-nuitka --standalone --enable-plugin=pyside6 main.py
+python -m nuitka --standalone --show-progress --windows-console-mode=disable --plugin-enable=pyside6 --follow-imports main.py
 ```
 
 2. Place the eBUS SDK installer in `dependencies/` folder:
