@@ -21,6 +21,7 @@ from .channel_panel import ChannelPanel
 from .control_panel import ControlPanel
 from .device_selector import DeviceSelectorDialog
 from utils.image_saver import ImageSaver
+from utils.settings import get_settings
 
 
 class MainWindow(QMainWindow):
@@ -37,6 +38,12 @@ class MainWindow(QMainWindow):
         self.device_manager = DeviceManager()
         self.acquisition_worker: Optional[DualStreamWorker] = None
         self.image_saver = ImageSaver()
+        self._settings = get_settings()
+
+        # 恢复上次保存的目录（如果存在）
+        saved_dir = self._settings.save_directory
+        if saved_dir:
+            self.image_saver.set_save_dir(saved_dir)
 
         # 设置窗口
         self.setWindowTitle("SW-8000Q 四通道相机采集软件")
@@ -309,6 +316,8 @@ class MainWindow(QMainWindow):
         if directory:
             self.image_saver.set_save_dir(directory)
             self._save_dir_label.setText(directory)
+            # 持久化保存目录设置
+            self._settings.save_directory = directory
 
     def _on_statistics_updated(self, stats: dict):
         """统计信息更新"""

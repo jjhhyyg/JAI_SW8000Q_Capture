@@ -1,5 +1,7 @@
 # JAI SW-8000Q 采集软件
 
+[English](README.md)
+
 基于 PySide6 的 JAI SW-8000Q 四棱镜线扫相机采集软件，支持 RGB + NIR 双通道同步采集。
 
 ## 功能特性
@@ -13,15 +15,17 @@
 
 ## 系统要求
 
-- Python 3.8+
-- [eBUS SDK](https://www.pleora.com/products/ebus-sdk/) (Pleora)
+- Python 3.9
+- [eBUS SDK](https://www.jai.com/support-software/jai-software/)
+- [eBUS SDK Python API](https://www.jai.com/support-software/jai-software/) (应该与 eBUS SDK 版本兼容)
 - PySide6
 - NumPy
 - OpenCV (cv2)
 
 ## 安装
 
-1. 安装 Pleora eBUS SDK
+1. 安装 eBUS SDK
+2. 安装 eBUS SDK Python API
 2. 安装 Python 依赖:
 
 ```bash
@@ -90,7 +94,7 @@ SW-8000Q 是一款四棱镜线扫相机，具有以下特点:
 ### 前置条件
 
 1. [NSIS](https://nsis.sourceforge.io/) (Nullsoft Scriptable Install System)
-2. [Nuitka](https://nuitka.net/) 或 PyInstaller 用于创建 `main.dist/` 文件夹
+2. [Nuitka](https://nuitka.net/) 用于创建 `main.dist/` 文件夹
 3. eBUS SDK 安装程序放置在 `dependencies/` 文件夹中
 
 ### 构建步骤

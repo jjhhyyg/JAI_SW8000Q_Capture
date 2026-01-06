@@ -1,5 +1,7 @@
 # JAI SW-8000Q Capture
 
+[Chinese](README.zh.md)
+
 A PySide6-based capture application for JAI SW-8000Q 4-CMOS prism line scan camera with dual-channel (RGB + NIR) streaming support.
 
 ## Features
@@ -13,15 +15,17 @@ A PySide6-based capture application for JAI SW-8000Q 4-CMOS prism line scan came
 
 ## Requirements
 
-- Python 3.8+
-- [eBUS SDK](https://www.pleora.com/products/ebus-sdk/) (Pleora)
+- Python 3.9
+- [eBUS SDK](https://www.jai.com/support-software/jai-software/)
+- [eBUS SDK Python API](https://www.jai.com/support-software/jai-software/) (should be compatible with eBUS SDK version)
 - PySide6
 - NumPy
 - OpenCV (cv2)
 
 ## Installation
 
-1. Install eBUS SDK from Pleora
+1. Install eBUS SDK
+2. Install eBUS SDK Python API Wrapper
 2. Install Python dependencies:
 
 ```bash
@@ -90,7 +94,7 @@ The application configures the camera's Transport Layer to send:
 ### Prerequisites
 
 1. [NSIS](https://nsis.sourceforge.io/) (Nullsoft Scriptable Install System)
-2. [Nuitka](https://nuitka.net/) or PyInstaller to create `main.dist/` folder
+2. [Nuitka](https://nuitka.net/) to create `main.dist/` folder
 3. eBUS SDK installer in `dependencies/` folder
 
 ### Build Steps
