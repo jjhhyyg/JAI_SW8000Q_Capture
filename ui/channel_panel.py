@@ -63,17 +63,17 @@ class ChannelPanel(QWidget):
         splitter = QSplitter(Qt.Horizontal)
 
         # 左侧: 全通道预览 (大图)
-        left_group = QGroupBox("全通道预览")
+        left_group = QGroupBox(self.tr("Full Channel Preview"))
         left_layout = QVBoxLayout(left_group)
         left_layout.setContentsMargins(5, 10, 5, 5)
 
-        self._main_preview = PreviewWidget("RGB 全通道")
+        self._main_preview = PreviewWidget(self.tr("RGB Full Channel"))
         left_layout.addWidget(self._main_preview)
 
         splitter.addWidget(left_group)
 
         # 右侧: 单通道预览 (2x2网格)
-        right_group = QGroupBox("单通道预览")
+        right_group = QGroupBox(self.tr("Single Channel Preview"))
         right_layout = QVBoxLayout(right_group)
         right_layout.setContentsMargins(5, 10, 5, 5)
 
@@ -214,17 +214,17 @@ class SingleStreamChannelPanel(QWidget):
         splitter = QSplitter(Qt.Horizontal)
 
         # 左侧: 全通道预览
-        left_group = QGroupBox("全通道预览")
+        left_group = QGroupBox(self.tr("Full Channel Preview"))
         left_layout = QVBoxLayout(left_group)
         left_layout.setContentsMargins(5, 10, 5, 5)
 
-        self._main_preview = PreviewWidget("RGB 全通道")
+        self._main_preview = PreviewWidget(self.tr("RGB Full Channel"))
         left_layout.addWidget(self._main_preview)
 
         splitter.addWidget(left_group)
 
         # 右侧: 单通道预览 (1x3)
-        right_group = QGroupBox("单通道预览")
+        right_group = QGroupBox(self.tr("Single Channel Preview"))
         right_layout = QVBoxLayout(right_group)
         right_layout.setContentsMargins(5, 10, 5, 5)
 

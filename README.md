@@ -101,7 +101,7 @@ The application configures the camera's Transport Layer to send:
 
 1. Compile the Python application:
 ```bash
-python -m nuitka --standalone --show-progress --windows-console-mode=disable --plugin-enable=pyside6 --follow-imports main.py
+build_nuitka.bat
 ```
 
 2. Place the eBUS SDK installer in `dependencies/` folder:
@@ -126,8 +126,8 @@ makensis installer.nsi
 - Prompts to install SDK if not found
 - Optional desktop shortcut
 - Start Menu shortcuts
-- Full uninstall support
+- Full uninstall support (eBUS SDK uninstallation is not supported)
 
 ## License
 
-This project is provided as a sample application for eBUS SDK.
+This project is licensed under the terms of the **[GNU General Public License v3.0](LICENSE)**.

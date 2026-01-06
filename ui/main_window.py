@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
     QMenuBar, QMenu, QToolBar, QStatusBar, QLabel,
     QMessageBox, QFileDialog, QDockWidget
 )
-from PySide6.QtGui import QAction, QIcon, QKeySequence, QDesktopServices
+from PySide6.QtGui import QAction, QIcon, QKeySequence, QDesktopServices, QActionGroup
 from PySide6.QtCore import Qt, QTimer, QUrl
 
 import sys
@@ -47,7 +47,7 @@ class MainWindow(QMainWindow):
             self.image_saver.set_save_dir(saved_dir)
 
         # 设置窗口
-        self.setWindowTitle("SW-8000Q 四通道相机采集软件")
+        self.setWindowTitle(self.tr("SW-8000Q Multi-Channel Camera Capture"))
         self.setMinimumSize(1200, 800)
 
         # 设置UI
@@ -85,28 +85,28 @@ class MainWindow(QMainWindow):
         menubar = self.menuBar()
 
         # 文件菜单
-        file_menu = menubar.addMenu("文件(&F)")
+        file_menu = menubar.addMenu(self.tr("&File"))
 
-        self._set_save_dir_action = QAction("设置保存目录...", self)
+        self._set_save_dir_action = QAction(self.tr("Set Save Directory..."), self)
         self._set_save_dir_action.triggered.connect(self._on_set_save_dir)
         file_menu.addAction(self._set_save_dir_action)
 
         file_menu.addSeparator()
 
-        self._exit_action = QAction("退出(&X)", self)
+        self._exit_action = QAction(self.tr("E&xit"), self)
         self._exit_action.setShortcut(QKeySequence.Quit)
         self._exit_action.triggered.connect(self.close)
         file_menu.addAction(self._exit_action)
 
         # 相机菜单
-        camera_menu = menubar.addMenu("相机(&C)")
+        camera_menu = menubar.addMenu(self.tr("&Camera"))
 
-        self._connect_action = QAction("连接设备...", self)
+        self._connect_action = QAction(self.tr("Connect Device..."), self)
         self._connect_action.setShortcut("Ctrl+O")
         self._connect_action.triggered.connect(self._on_connect_device)
         camera_menu.addAction(self._connect_action)
 
-        self._disconnect_action = QAction("断开连接", self)
+        self._disconnect_action = QAction(self.tr("Disconnect"), self)
         self._disconnect_action.setShortcut("Ctrl+D")
         self._disconnect_action.triggered.connect(self._on_disconnect_device)
         self._disconnect_action.setEnabled(False)
@@ -114,13 +114,13 @@ class MainWindow(QMainWindow):
 
         camera_menu.addSeparator()
 
-        self._start_action = QAction("开始采集", self)
+        self._start_action = QAction(self.tr("Start Acquisition"), self)
         self._start_action.setShortcut("F5")
         self._start_action.triggered.connect(self._on_start_acquisition)
         self._start_action.setEnabled(False)
         camera_menu.addAction(self._start_action)
 
-        self._stop_action = QAction("停止采集", self)
+        self._stop_action = QAction(self.tr("Stop Acquisition"), self)
         self._stop_action.setShortcut("F6")
         self._stop_action.triggered.connect(self._on_stop_acquisition)
         self._stop_action.setEnabled(False)
@@ -128,63 +128,95 @@ class MainWindow(QMainWindow):
 
         camera_menu.addSeparator()
 
-        self._capture_action = QAction("拍照保存", self)
+        self._capture_action = QAction(self.tr("Capture"), self)
         self._capture_action.setShortcut("Space")
         self._capture_action.triggered.connect(self._on_capture)
         self._capture_action.setEnabled(False)
         camera_menu.addAction(self._capture_action)
 
-        # 帮助菜单
-        help_menu = menubar.addMenu("帮助(&H)")
+        # 语言菜单
+        language_menu = menubar.addMenu(self.tr("&Language"))
 
-        self._about_action = QAction("关于...", self)
+        # 创建互斥的语言动作组
+        language_group = QActionGroup(self)
+        language_group.setExclusive(True)
+
+        current_language = self._settings.get_language()
+
+        self._lang_auto_action = QAction(self.tr("Auto (System)"), self)
+        self._lang_auto_action.setCheckable(True)
+        self._lang_auto_action.setChecked(current_language == "auto")
+        self._lang_auto_action.setData("auto")
+        language_group.addAction(self._lang_auto_action)
+        language_menu.addAction(self._lang_auto_action)
+
+        self._lang_zh_action = QAction("中文", self)
+        self._lang_zh_action.setCheckable(True)
+        self._lang_zh_action.setChecked(current_language == "zh_CN")
+        self._lang_zh_action.setData("zh_CN")
+        language_group.addAction(self._lang_zh_action)
+        language_menu.addAction(self._lang_zh_action)
+
+        self._lang_en_action = QAction("English", self)
+        self._lang_en_action.setCheckable(True)
+        self._lang_en_action.setChecked(current_language == "en_US")
+        self._lang_en_action.setData("en_US")
+        language_group.addAction(self._lang_en_action)
+        language_menu.addAction(self._lang_en_action)
+
+        language_group.triggered.connect(self._on_language_changed)
+
+        # 帮助菜单
+        help_menu = menubar.addMenu(self.tr("&Help"))
+
+        self._about_action = QAction(self.tr("About..."), self)
         self._about_action.triggered.connect(self._on_about)
         help_menu.addAction(self._about_action)
 
     def _setup_toolbar(self):
         """设置工具栏"""
-        toolbar = QToolBar("主工具栏")
+        toolbar = QToolBar(self.tr("Main Toolbar"))
         toolbar.setMovable(False)
         self.addToolBar(toolbar)
 
         # 连接按钮
-        self._toolbar_connect = toolbar.addAction("连接")
+        self._toolbar_connect = toolbar.addAction(self.tr("Connect"))
         self._toolbar_connect.triggered.connect(self._on_connect_device)
 
         # 断开按钮
-        self._toolbar_disconnect = toolbar.addAction("断开")
+        self._toolbar_disconnect = toolbar.addAction(self.tr("Disconnect"))
         self._toolbar_disconnect.triggered.connect(self._on_disconnect_device)
         self._toolbar_disconnect.setEnabled(False)
 
         toolbar.addSeparator()
 
         # 开始采集按钮
-        self._toolbar_start = toolbar.addAction("开始采集")
+        self._toolbar_start = toolbar.addAction(self.tr("Start"))
         self._toolbar_start.triggered.connect(self._on_start_acquisition)
         self._toolbar_start.setEnabled(False)
 
         # 停止采集按钮
-        self._toolbar_stop = toolbar.addAction("停止采集")
+        self._toolbar_stop = toolbar.addAction(self.tr("Stop"))
         self._toolbar_stop.triggered.connect(self._on_stop_acquisition)
         self._toolbar_stop.setEnabled(False)
 
         toolbar.addSeparator()
 
         # 拍照按钮
-        self._toolbar_capture = toolbar.addAction("拍照 (Space)")
+        self._toolbar_capture = toolbar.addAction(self.tr("Capture (Space)"))
         self._toolbar_capture.triggered.connect(self._on_capture)
         self._toolbar_capture.setEnabled(False)
 
         toolbar.addSeparator()
 
         # 保存目录显示
-        toolbar.addWidget(QLabel("保存目录: "))
-        self._save_dir_label = QLabel(self.image_saver.save_dir or "未设置")
+        toolbar.addWidget(QLabel(self.tr("Save Directory: ")))
+        self._save_dir_label = QLabel(self.image_saver.save_dir or self.tr("Not Set"))
         self._save_dir_label.setStyleSheet("color: lightblue;")
         toolbar.addWidget(self._save_dir_label)
 
         # 设置目录按钮
-        self._toolbar_set_dir = toolbar.addAction("浏览...")
+        self._toolbar_set_dir = toolbar.addAction(self.tr("Browse..."))
         self._toolbar_set_dir.triggered.connect(self._on_set_save_dir)
 
     def _setup_statusbar(self):
@@ -193,13 +225,13 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.statusbar)
 
         # 连接状态
-        self._status_connection = QLabel("未连接")
+        self._status_connection = QLabel(self.tr("Disconnected"))
         self.statusbar.addWidget(self._status_connection)
 
         self.statusbar.addWidget(QLabel(" | "))
 
         # 采集状态
-        self._status_acquisition = QLabel("采集: 停止")
+        self._status_acquisition = QLabel(self.tr("Acquisition: Stopped"))
         self.statusbar.addWidget(self._status_acquisition)
 
         self.statusbar.addWidget(QLabel(" | "))
@@ -211,7 +243,7 @@ class MainWindow(QMainWindow):
         self.statusbar.addWidget(QLabel(" | "))
 
         # 带宽
-        self._status_bandwidth = QLabel("带宽: -- Mb/s")
+        self._status_bandwidth = QLabel(self.tr("Bandwidth: -- Mb/s"))
         self.statusbar.addWidget(self._status_bandwidth)
 
     def _on_connect_device(self):
@@ -234,9 +266,9 @@ class MainWindow(QMainWindow):
                 # 恢复相机保存的参数设置
                 self._restore_camera_settings()
 
-                QMessageBox.information(self, "成功", f"已连接到设备:\n{device_info}")
+                QMessageBox.information(self, self.tr("Success"), self.tr("Connected to device:") + f"\n{device_info}")
             else:
-                QMessageBox.critical(self, "连接失败", message)
+                QMessageBox.critical(self, self.tr("Connection Failed"), message)
 
     def _on_disconnect_device(self):
         """断开设备"""
@@ -260,7 +292,7 @@ class MainWindow(QMainWindow):
     def _on_start_acquisition(self):
         """开始采集"""
         if not self.device_manager.is_connected:
-            QMessageBox.warning(self, "警告", "请先连接设备")
+            QMessageBox.warning(self, self.tr("Warning"), self.tr("Please connect to a device first"))
             return
 
         if self.acquisition_worker and self.acquisition_worker.is_running:
@@ -288,13 +320,13 @@ class MainWindow(QMainWindow):
     def _on_capture(self):
         """拍照保存"""
         if not self.acquisition_worker or not self.acquisition_worker.is_running:
-            QMessageBox.warning(self, "警告", "请先开始采集")
+            QMessageBox.warning(self, self.tr("Warning"), self.tr("Please start acquisition first"))
             return
 
         if not self.image_saver.save_dir:
             result = QMessageBox.question(
-                self, "提示",
-                "尚未设置保存目录，是否现在设置？",
+                self, self.tr("Notice"),
+                self.tr("Save directory not set. Set it now?"),
                 QMessageBox.Yes | QMessageBox.No
             )
             if result == QMessageBox.Yes:
@@ -311,7 +343,7 @@ class MainWindow(QMainWindow):
         nir_data = channel_data.get('nir')
 
         if rgb_data is None:
-            QMessageBox.warning(self, "警告", "没有可用的图像数据")
+            QMessageBox.warning(self, self.tr("Warning"), self.tr("No image data available"))
             return
 
         # 保存图像
@@ -323,12 +355,12 @@ class MainWindow(QMainWindow):
                 save_folder = os.path.dirname(saved_files[0])
 
                 # 在状态栏显示保存位置
-                self.statusbar.showMessage(f"已保存 {len(saved_files)} 个文件到: {save_folder}", 5000)
+                self.statusbar.showMessage(self.tr("Saved {0} files to: {1}").format(len(saved_files), save_folder), 5000)
 
                 # 打开保存文件夹
                 QDesktopServices.openUrl(QUrl.fromLocalFile(save_folder))
         except Exception as e:
-            QMessageBox.critical(self, "保存失败", f"保存图像时出错:\n{str(e)}")
+            QMessageBox.critical(self, self.tr("Save Failed"), self.tr("Error saving images:") + f"\n{str(e)}")
 
     def _on_set_save_dir(self):
         """设置保存目录"""
@@ -336,7 +368,7 @@ class MainWindow(QMainWindow):
 
         # 使用 Qt 自己的文件对话框，避免 COM 初始化问题
         directory = QFileDialog.getExistingDirectory(
-            self, "选择保存目录", current_dir,
+            self, self.tr("Select Save Directory"), current_dir,
             QFileDialog.ShowDirsOnly | QFileDialog.DontUseNativeDialog
         )
 
@@ -423,11 +455,11 @@ class MainWindow(QMainWindow):
             total_bandwidth += source_stats.get('bandwidth', 0)
 
         self._status_fps.setText(f"FPS: {total_fps:.1f}")
-        self._status_bandwidth.setText(f"带宽: {total_bandwidth:.1f} Mb/s")
+        self._status_bandwidth.setText(self.tr("Bandwidth: {0:.1f} Mb/s").format(total_bandwidth))
 
     def _on_acquisition_error(self, error_msg: str):
         """采集错误"""
-        QMessageBox.critical(self, "采集错误", error_msg)
+        QMessageBox.critical(self, self.tr("Acquisition Error"), error_msg)
         self._update_ui_acquisition_stopped()
 
     def _on_acquisition_started(self):
@@ -447,7 +479,7 @@ class MainWindow(QMainWindow):
         self._toolbar_disconnect.setEnabled(True)
         self._toolbar_start.setEnabled(True)
         self.control_panel.set_enabled(True)
-        self._status_connection.setText("已连接")
+        self._status_connection.setText(self.tr("Connected"))
         self._status_connection.setStyleSheet("color: green;")
 
     def _update_ui_disconnected(self):
@@ -463,11 +495,11 @@ class MainWindow(QMainWindow):
         self._toolbar_stop.setEnabled(False)
         self._toolbar_capture.setEnabled(False)
         self.control_panel.set_enabled(False)
-        self._status_connection.setText("未连接")
+        self._status_connection.setText(self.tr("Disconnected"))
         self._status_connection.setStyleSheet("color: red;")
-        self._status_acquisition.setText("采集: 停止")
+        self._status_acquisition.setText(self.tr("Acquisition: Stopped"))
         self._status_fps.setText("FPS: --")
-        self._status_bandwidth.setText("带宽: -- Mb/s")
+        self._status_bandwidth.setText(self.tr("Bandwidth: -- Mb/s"))
 
     def _update_ui_acquisition_started(self):
         """更新UI - 采集中状态"""
@@ -479,7 +511,7 @@ class MainWindow(QMainWindow):
         self._toolbar_stop.setEnabled(True)
         self._toolbar_capture.setEnabled(True)
         self._toolbar_disconnect.setEnabled(False)
-        self._status_acquisition.setText("采集: 运行中")
+        self._status_acquisition.setText(self.tr("Acquisition: Running"))
         self._status_acquisition.setStyleSheet("color: green;")
 
     def _update_ui_acquisition_stopped(self):
@@ -492,10 +524,10 @@ class MainWindow(QMainWindow):
         self._toolbar_stop.setEnabled(False)
         self._toolbar_capture.setEnabled(False)
         self._toolbar_disconnect.setEnabled(True)
-        self._status_acquisition.setText("采集: 停止")
+        self._status_acquisition.setText(self.tr("Acquisition: Stopped"))
         self._status_acquisition.setStyleSheet("")
         self._status_fps.setText("FPS: --")
-        self._status_bandwidth.setText("带宽: -- Mb/s")
+        self._status_bandwidth.setText(self.tr("Bandwidth: -- Mb/s"))
 
     def _update_status(self):
         """定时状态更新"""
@@ -505,21 +537,33 @@ class MainWindow(QMainWindow):
         """关于对话框"""
         QMessageBox.about(
             self,
-            "关于 SW-8000Q 采集软件",
-            """<h3>SW-8000Q 四通道相机采集软件</h3>
-            <p>版本: 1.0.0</p>
-            <p>用于光度立体重建的图像采集测试</p>
-            <p>支持 JAI SW-8000Q-10GE 四CMOS棱镜相机</p>
+            self.tr("About SW-8000Q Capture"),
+            self.tr("""<h3>SW-8000Q Multi-Channel Camera Capture</h3>
+            <p>Version: 1.0.0</p>
+            <p>Image capture for photometric stereo reconstruction</p>
+            <p>Supports JAI SW-8000Q-10GE 4-CMOS prism camera</p>
             <hr>
-            <p>功能特性:</p>
+            <p>Features:</p>
             <ul>
-                <li>设备发现与连接</li>
-                <li>RGB + NIR 双流实时预览</li>
-                <li>R/G/B/NIR 四通道分离显示</li>
-                <li>单帧拍照与分通道保存</li>
-                <li>曝光、增益等参数控制</li>
+                <li>Device discovery and connection</li>
+                <li>RGB + NIR dual-stream live preview</li>
+                <li>R/G/B/NIR 4-channel separation display</li>
+                <li>Single frame capture with channel separation</li>
+                <li>Exposure, gain and other parameter control</li>
             </ul>
-            """
+            """)
+        )
+
+    def _on_language_changed(self, action: QAction):
+        """语言切换"""
+        language = action.data()
+        self._settings.set_language(language)
+
+        # 提示用户重启应用
+        QMessageBox.information(
+            self,
+            self.tr("Language Changed"),
+            self.tr("Language setting saved. Please restart the application for the change to take effect.")
         )
 
     def closeEvent(self, event):

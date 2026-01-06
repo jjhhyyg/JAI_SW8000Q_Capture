@@ -29,7 +29,7 @@ class DeviceSelectorDialog(QDialog):
         self._devices: List[DeviceInfo] = []
         self._selected_device: Optional[DeviceInfo] = None
 
-        self.setWindowTitle("选择设备")
+        self.setWindowTitle(self.tr("Select Device"))
         self.setMinimumSize(700, 400)
         self.setModal(True)
 
@@ -43,14 +43,15 @@ class DeviceSelectorDialog(QDialog):
         layout = QVBoxLayout(self)
 
         # 提示标签
-        hint_label = QLabel("请选择要连接的设备:")
+        hint_label = QLabel(self.tr("Please select a device to connect:"))
         layout.addWidget(hint_label)
 
         # 设备列表表格
         self._table = QTableWidget()
         self._table.setColumnCount(5)
         self._table.setHorizontalHeaderLabels([
-            "型号", "序列号", "IP地址", "MAC地址", "类型"
+            self.tr("Model"), self.tr("Serial Number"), self.tr("IP Address"),
+            self.tr("MAC Address"), self.tr("Type")
         ])
         self._table.setSelectionBehavior(QTableWidget.SelectRows)
         self._table.setSelectionMode(QTableWidget.SingleSelection)
@@ -64,18 +65,18 @@ class DeviceSelectorDialog(QDialog):
         # 按钮区域
         button_layout = QHBoxLayout()
 
-        self._refresh_button = QPushButton("刷新")
+        self._refresh_button = QPushButton(self.tr("Refresh"))
         self._refresh_button.clicked.connect(self._scan_devices)
         button_layout.addWidget(self._refresh_button)
 
         button_layout.addStretch()
 
-        self._connect_button = QPushButton("连接")
+        self._connect_button = QPushButton(self.tr("Connect"))
         self._connect_button.setDefault(True)
         self._connect_button.clicked.connect(self._on_connect)
         button_layout.addWidget(self._connect_button)
 
-        self._cancel_button = QPushButton("取消")
+        self._cancel_button = QPushButton(self.tr("Cancel"))
         self._cancel_button.clicked.connect(self.reject)
         button_layout.addWidget(self._cancel_button)
 
@@ -84,7 +85,7 @@ class DeviceSelectorDialog(QDialog):
     def _scan_devices(self):
         """扫描设备"""
         self._refresh_button.setEnabled(False)
-        self._refresh_button.setText("扫描中...")
+        self._refresh_button.setText(self.tr("Scanning..."))
 
         # 清空表格
         self._table.setRowCount(0)
@@ -107,25 +108,25 @@ class DeviceSelectorDialog(QDialog):
 
             if not self._devices:
                 QMessageBox.information(
-                    self, "提示",
-                    "未发现任何设备。\n请检查设备连接和网络设置。"
+                    self, self.tr("Notice"),
+                    self.tr("No devices found.\nPlease check device connections and network settings.")
                 )
 
         except Exception as e:
             QMessageBox.critical(
-                self, "错误",
-                f"扫描设备时出错:\n{str(e)}"
+                self, self.tr("Error"),
+                self.tr("Error scanning devices:") + f"\n{str(e)}"
             )
 
         finally:
             self._refresh_button.setEnabled(True)
-            self._refresh_button.setText("刷新")
+            self._refresh_button.setText(self.tr("Refresh"))
 
     def _on_connect(self):
         """连接按钮点击"""
         selected_rows = self._table.selectedItems()
         if not selected_rows:
-            QMessageBox.warning(self, "提示", "请先选择一个设备")
+            QMessageBox.warning(self, self.tr("Notice"), self.tr("Please select a device first"))
             return
 
         row = self._table.currentRow()

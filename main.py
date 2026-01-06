@@ -32,10 +32,11 @@ if sys.platform == 'win32':
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTranslator, QLocale, QLibraryInfo
 from PySide6.QtGui import QFont
 
 from ui.main_window import MainWindow
+from utils.settings import AppSettings
 
 
 def setup_high_dpi():
@@ -45,6 +46,86 @@ def setup_high_dpi():
         QApplication.setHighDpiScaleFactorRoundingPolicy(
             Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
         )
+
+
+def get_app_dir() -> str:
+    """
+    获取应用程序目录
+
+    支持开发模式和 Nuitka/PyInstaller 打包模式
+    """
+    # 方法1: 检查是否是 PyInstaller onefile 模式
+    if hasattr(sys, '_MEIPASS'):
+        return sys._MEIPASS
+
+    # 方法2: 检查 frozen 属性 (PyInstaller/Nuitka)
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(os.path.abspath(sys.executable))
+
+    # 方法3: 检查可执行文件扩展名 (针对 Nuitka standalone)
+    if sys.executable.endswith('.exe') and not sys.executable.endswith('python.exe'):
+        exe_dir = os.path.dirname(os.path.abspath(sys.executable))
+        # 验证 translations 目录是否在 exe 目录中
+        if os.path.isdir(os.path.join(exe_dir, 'translations')):
+            return exe_dir
+
+    # 开发模式: 使用源文件所在目录
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+def setup_translations(app: QApplication) -> list:
+    """
+    设置应用翻译
+
+    Returns:
+        已安装的翻译器列表 (需要保持引用以防止被垃圾回收)
+    """
+    translators = []
+    settings = AppSettings()
+
+    # 获取语言设置
+    language = settings.get_language()
+
+    # 确定使用的语言环境
+    if language == "auto":
+        locale = QLocale.system()
+    elif language == "zh_CN":
+        locale = QLocale(QLocale.Language.Chinese, QLocale.Country.China)
+    elif language == "en_US":
+        locale = QLocale(QLocale.Language.English, QLocale.Country.UnitedStates)
+    else:
+        locale = QLocale.system()
+
+    # 加载 Qt 自带的翻译 (对话框按钮等)
+    qt_translator = QTranslator()
+    qt_translations_path = QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)
+    if qt_translator.load(locale, "qtbase", "_", qt_translations_path):
+        app.installTranslator(qt_translator)
+        translators.append(qt_translator)
+
+    # 获取应用目录 (支持打包模式)
+    app_dir = get_app_dir()
+    translations_dir = os.path.join(app_dir, "translations")
+
+    print(f"[i18n] App directory: {app_dir}")
+    print(f"[i18n] Translations directory: {translations_dir}")
+    print(f"[i18n] Translations dir exists: {os.path.isdir(translations_dir)}")
+
+    # 加载应用自己的翻译
+    app_translator = QTranslator()
+
+    # 尝试加载翻译文件
+    if app_translator.load(locale, "sw8000q", "_", translations_dir):
+        app.installTranslator(app_translator)
+        translators.append(app_translator)
+        print(f"[i18n] Loaded translation for locale: {locale.name()}")
+    else:
+        print(f"[i18n] No translation found for locale: {locale.name()}, using default (English)")
+        # 列出 translations 目录内容以便调试
+        if os.path.isdir(translations_dir):
+            print(f"[i18n] Available files: {os.listdir(translations_dir)}")
+
+    return translators
 
 
 def setup_style(app: QApplication):
@@ -261,6 +342,9 @@ def main():
     app = QApplication(sys.argv)
     app.setApplicationName("SW-8000Q Capture")
     app.setOrganizationName("Photometric Stereo")
+
+    # 设置翻译 (必须在创建窗口之前)
+    translators = setup_translations(app)
 
     # 设置样式
     setup_style(app)

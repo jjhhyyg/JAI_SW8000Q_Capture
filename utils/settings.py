@@ -40,6 +40,7 @@ class AppSettings:
 
     # 设置键名
     KEY_SAVE_DIRECTORY = "image_save/directory"
+    KEY_LANGUAGE = "app/language"
 
     def __init__(self):
         """初始化设置管理器"""
@@ -81,6 +82,27 @@ class AppSettings:
     def clear_save_directory(self):
         """清除保存目录设置"""
         self._settings.remove(self.KEY_SAVE_DIRECTORY)
+        self._settings.sync()
+
+    # ========== 语言设置 ==========
+
+    def get_language(self) -> str:
+        """
+        获取当前语言设置
+
+        Returns:
+            语言代码: 'auto' (跟随系统), 'zh_CN' (中文), 'en_US' (英文)
+        """
+        return self._settings.value(self.KEY_LANGUAGE, "auto")
+
+    def set_language(self, language: str):
+        """
+        设置语言
+
+        Args:
+            language: 语言代码 ('auto', 'zh_CN', 'en_US')
+        """
+        self._settings.setValue(self.KEY_LANGUAGE, language)
         self._settings.sync()
 
     def get_settings_file_path(self) -> str:

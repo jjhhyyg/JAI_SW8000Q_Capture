@@ -101,7 +101,7 @@ SW-8000Q 是一款四棱镜线扫相机，具有以下特点:
 
 1. 编译 Python 应用程序:
 ```bash
-python -m nuitka --standalone --show-progress --windows-console-mode=disable --plugin-enable=pyside6 --follow-imports main.py
+build_nuitka.bat
 ```
 
 2. 将 eBUS SDK 安装程序放入 `dependencies/` 文件夹:
@@ -126,8 +126,8 @@ makensis installer.nsi
 - 如未安装则提示安装 SDK
 - 可选的桌面快捷方式
 - 开始菜单快捷方式
-- 完整的卸载支持
+- 完整的卸载支持（不包括eBUS SDK卸载）
 
 ## 许可证
 
-本项目作为 eBUS SDK 示例程序提供。
+本项目采用 **[GNU 通用公共许可证 v3.0](LICENSE)** (GNU General Public License) 进行许可。

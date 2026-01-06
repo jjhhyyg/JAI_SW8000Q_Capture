@@ -19,13 +19,13 @@ RequestExecutionLevel admin
 Unicode True
 
 ; Version Info
-VIProductVersion "1.0.0.0"
+VIProductVersion "1.0.0.1"
 VIAddVersionKey "ProductName" "JAI SW-8000Q Capture"
 VIAddVersionKey "CompanyName" "USTB MVIT Group"
 VIAddVersionKey "Authors" "HOU YANGYANG"
 VIAddVersionKey "FileDescription" "JAI SW-8000Q 4-CMOS Camera Capture Software"
-VIAddVersionKey "FileVersion" "1.0.0"
-VIAddVersionKey "ProductVersion" "1.0.0"
+VIAddVersionKey "FileVersion" "1.0.1"
+VIAddVersionKey "ProductVersion" "1.0.1"
 VIAddVersionKey "LegalCopyright" "Copyright (c) 2026"
 
 ;--------------------------------

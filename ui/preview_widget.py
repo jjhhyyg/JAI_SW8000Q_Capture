@@ -64,7 +64,7 @@ class PreviewWidget(QWidget):
 
     def _show_placeholder(self):
         """显示占位符"""
-        self._image_label.setText("无图像")
+        self._image_label.setText(self.tr("No Image"))
         self._image_label.setStyleSheet("""
             QLabel {
                 background-color: #1a1a1a;

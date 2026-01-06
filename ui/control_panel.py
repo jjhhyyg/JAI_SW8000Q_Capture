@@ -42,11 +42,11 @@ class ControlPanel(QWidget):
         main_layout.setSpacing(10)
 
         # 曝光控制组
-        exposure_group = QGroupBox("曝光控制")
+        exposure_group = QGroupBox(self.tr("Exposure Control"))
         exposure_layout = QGridLayout(exposure_group)
 
         # 曝光时间
-        exposure_layout.addWidget(QLabel("曝光时间 (µs):"), 0, 0)
+        exposure_layout.addWidget(QLabel(self.tr("Exposure Time (µs):")), 0, 0)
 
         self._exposure_edit = QLineEdit()
         self._exposure_edit.setValidator(QDoubleValidator(1, 1000000, 1))
@@ -62,11 +62,11 @@ class ControlPanel(QWidget):
         main_layout.addWidget(exposure_group)
 
         # 增益控制组
-        gain_group = QGroupBox("增益控制")
+        gain_group = QGroupBox(self.tr("Gain Control"))
         gain_layout = QGridLayout(gain_group)
 
         # 增益
-        gain_layout.addWidget(QLabel("增益 (dB):"), 0, 0)
+        gain_layout.addWidget(QLabel(self.tr("Gain (dB):")), 0, 0)
 
         self._gain_edit = QLineEdit()
         self._gain_edit.setValidator(QDoubleValidator(0, 36, 1))
@@ -82,11 +82,11 @@ class ControlPanel(QWidget):
         main_layout.addWidget(gain_group)
 
         # 行频控制组
-        line_rate_group = QGroupBox("行频控制")
+        line_rate_group = QGroupBox(self.tr("Line Rate Control"))
         line_rate_layout = QGridLayout(line_rate_group)
 
         # 行频
-        line_rate_layout.addWidget(QLabel("行频 (Hz):"), 0, 0)
+        line_rate_layout.addWidget(QLabel(self.tr("Line Rate (Hz):")), 0, 0)
 
         self._line_rate_edit = QLineEdit()
         self._line_rate_edit.setValidator(QIntValidator(1, 100000))
@@ -102,11 +102,11 @@ class ControlPanel(QWidget):
         main_layout.addWidget(line_rate_group)
 
         # 图像尺寸控制组
-        size_group = QGroupBox("图像尺寸")
+        size_group = QGroupBox(self.tr("Image Size"))
         size_layout = QGridLayout(size_group)
 
         # 宽度
-        size_layout.addWidget(QLabel("宽度:"), 0, 0)
+        size_layout.addWidget(QLabel(self.tr("Width:")), 0, 0)
         self._width_spinbox = QSpinBox()
         self._width_spinbox.setRange(64, 16384)
         self._width_spinbox.setSingleStep(64)
@@ -114,7 +114,7 @@ class ControlPanel(QWidget):
         size_layout.addWidget(self._width_spinbox, 0, 1)
 
         # 高度
-        size_layout.addWidget(QLabel("高度:"), 1, 0)
+        size_layout.addWidget(QLabel(self.tr("Height:")), 1, 0)
         self._height_spinbox = QSpinBox()
         self._height_spinbox.setRange(1, 65535)
         self._height_spinbox.setSingleStep(1)
@@ -122,7 +122,7 @@ class ControlPanel(QWidget):
         size_layout.addWidget(self._height_spinbox, 1, 1)
 
         # 应用按钮
-        self._apply_size_button = QPushButton("应用尺寸")
+        self._apply_size_button = QPushButton(self.tr("Apply Size"))
         size_layout.addWidget(self._apply_size_button, 2, 0, 1, 2)
 
         main_layout.addWidget(size_group)
@@ -131,8 +131,8 @@ class ControlPanel(QWidget):
         refresh_layout = QVBoxLayout()
         refresh_layout.addStretch()
 
-        self._refresh_button = QPushButton("刷新参数")
-        self._refresh_button.setToolTip("从相机读取当前参数值")
+        self._refresh_button = QPushButton(self.tr("Refresh"))
+        self._refresh_button.setToolTip(self.tr("Read current parameter values from camera"))
         refresh_layout.addWidget(self._refresh_button)
 
         refresh_layout.addStretch()
