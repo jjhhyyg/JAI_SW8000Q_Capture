@@ -244,10 +244,25 @@ class ControlPanel(QWidget):
         width = self._width_spinbox.value()
         height = self._height_spinbox.value()
 
-        success = self.device_manager.set_image_size(width, height)
-        if success:
+        # 分别设置宽度和高度，以便获取单独的成功/失败状态
+        success_w = self.device_manager.set_parameter("Width", width)
+        success_h = self.device_manager.set_parameter("Height", height)
+
+        if success_w:
             self.parameter_changed.emit("Width", width)
+            print(f"[ControlPanel] 成功设置 Width = {width}")
+        else:
+            print(f"[ControlPanel] 设置 Width = {width} 失败")
+
+        if success_h:
             self.parameter_changed.emit("Height", height)
+            print(f"[ControlPanel] 成功设置 Height = {height}")
+        else:
+            print(f"[ControlPanel] 设置 Height = {height} 失败")
+
+        # 刷新参数以显示实际值
+        if not success_w or not success_h:
+            self.refresh_parameters()
 
     def refresh_parameters(self):
         """从设备读取当前参数"""

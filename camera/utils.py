@@ -96,10 +96,17 @@ def write_parameter(parameters, name: str, value: Any) -> bool:
     """
     param = parameters.Get(name)
     if param is None:
+        print(f"[write_parameter] 参数 '{name}' 不存在")
         return False
 
+    result, is_available = param.IsAvailable()
+    result, is_readable = param.IsReadable()
     result, is_writable = param.IsWritable()
+
+    print(f"[write_parameter] 参数 '{name}': available={is_available}, readable={is_readable}, writable={is_writable}")
+
     if not is_writable:
+        print(f"[write_parameter] 参数 '{name}' 不可写 - 可能需要先停止采集或解锁TLParamsLocked")
         return False
 
     result, gen_type = param.GetType()
@@ -112,6 +119,9 @@ def write_parameter(parameters, name: str, value: Any) -> bool:
             result = param.SetValue(value)
     else:
         result = param.SetValue(value)
+
+    if not result.IsOK():
+        print(f"[write_parameter] 设置参数 '{name}' = {value} 失败: {result.GetCodeString()} - {result.GetDescription()}")
 
     return result.IsOK()
 

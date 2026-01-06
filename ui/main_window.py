@@ -21,7 +21,7 @@ from .channel_panel import ChannelPanel
 from .control_panel import ControlPanel
 from .device_selector import DeviceSelectorDialog
 from utils.image_saver import ImageSaver
-from utils.settings import get_settings
+from utils.settings import get_settings, CameraSettings
 
 
 class MainWindow(QMainWindow):
@@ -39,6 +39,7 @@ class MainWindow(QMainWindow):
         self.acquisition_worker: Optional[DualStreamWorker] = None
         self.image_saver = ImageSaver()
         self._settings = get_settings()
+        self._current_mac_address: Optional[str] = None  # 当前连接相机的 MAC 地址
 
         # 恢复上次保存的目录（如果存在）
         saved_dir = self._settings.save_directory
@@ -179,7 +180,7 @@ class MainWindow(QMainWindow):
         # 保存目录显示
         toolbar.addWidget(QLabel("保存目录: "))
         self._save_dir_label = QLabel(self.image_saver.save_dir or "未设置")
-        self._save_dir_label.setStyleSheet("color: blue;")
+        self._save_dir_label.setStyleSheet("color: lightblue;")
         toolbar.addWidget(self._save_dir_label)
 
         # 设置目录按钮
@@ -221,8 +222,18 @@ class MainWindow(QMainWindow):
             success, message = self.device_manager.connect(device_info.connection_id)
 
             if success:
+                # 保存当前相机的 MAC 地址
+                self._current_mac_address = device_info.mac_address
+
                 self._update_ui_connected()
                 self.control_panel.refresh_parameters()
+
+                # 连接参数变化信号，用于持久化保存
+                self.control_panel.parameter_changed.connect(self._on_parameter_changed)
+
+                # 恢复相机保存的参数设置
+                self._restore_camera_settings()
+
                 QMessageBox.information(self, "成功", f"已连接到设备:\n{device_info}")
             else:
                 QMessageBox.critical(self, "连接失败", message)
@@ -233,9 +244,16 @@ class MainWindow(QMainWindow):
         if self.acquisition_worker and self.acquisition_worker.is_running:
             self._on_stop_acquisition()
 
+        # 断开参数变化信号连接
+        try:
+            self.control_panel.parameter_changed.disconnect(self._on_parameter_changed)
+        except RuntimeError:
+            pass  # 信号未连接
+
         success, message = self.device_manager.disconnect()
 
         if success:
+            self._current_mac_address = None
             self._update_ui_disconnected()
             self.channel_panel.clear_all()
 
@@ -318,6 +336,72 @@ class MainWindow(QMainWindow):
             self._save_dir_label.setText(directory)
             # 持久化保存目录设置
             self._settings.save_directory = directory
+
+    def _restore_camera_settings(self):
+        """
+        恢复相机保存的参数设置
+
+        在相机连接后调用，从 QSettings 读取上次保存的参数并应用到相机
+        """
+        if not self._current_mac_address:
+            return
+
+        # 获取保存的设置
+        saved_settings = self._settings.get_camera_settings(self._current_mac_address)
+
+        if saved_settings.is_empty():
+            print(f"[MainWindow] 未找到相机 {self._current_mac_address} 的保存设置")
+            return
+
+        print(f"[MainWindow] 恢复相机 {self._current_mac_address} 的设置:")
+
+        # 应用曝光时间
+        if saved_settings.exposure_time is not None:
+            success = self.device_manager.set_exposure_time(saved_settings.exposure_time)
+            if success:
+                print(f"  - 曝光时间: {saved_settings.exposure_time} µs")
+
+        # 应用增益
+        if saved_settings.gain is not None:
+            success = self.device_manager.set_gain(saved_settings.gain)
+            if success:
+                print(f"  - 增益: {saved_settings.gain} dB")
+
+        # 应用行频
+        if saved_settings.line_rate is not None:
+            success = self.device_manager.set_acquisition_line_rate(saved_settings.line_rate)
+            if success:
+                print(f"  - 行频: {saved_settings.line_rate} Hz")
+
+        # 刷新控制面板显示
+        self.control_panel.refresh_parameters()
+
+    def _on_parameter_changed(self, param_name: str, value):
+        """
+        参数变化时保存到设置
+
+        Args:
+            param_name: 参数名称
+            value: 参数值
+        """
+        if not self._current_mac_address:
+            return
+
+        # 映射 GenICam 参数名到设置键名
+        param_map = {
+            "ExposureTime": "exposure_time",
+            "Gain": "gain",
+            "AcquisitionLineRate": "line_rate"
+        }
+
+        settings_key = param_map.get(param_name)
+        if settings_key:
+            self._settings.save_camera_parameter(
+                self._current_mac_address,
+                settings_key,
+                value
+            )
+            print(f"[MainWindow] 保存相机参数: {param_name} = {value}")
 
     def _on_statistics_updated(self, stats: dict):
         """统计信息更新"""

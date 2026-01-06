@@ -26,7 +26,7 @@ if not exist "main.dist" (
 REM Check if dependencies folder exists
 if not exist "dependencies" (
     echo ERROR: dependencies folder not found
-    echo Please create dependencies folder with eBUS SDK installer
+    echo Please create dependencies folder and add the eBUS SDK installer to it
     pause
     exit /b 1
 )

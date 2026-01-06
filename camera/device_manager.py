@@ -143,6 +143,8 @@ class DeviceManager:
         """
         连接到指定设备
 
+        使用 Exclusive 模式连接，以获取完整的读写权限
+
         Args:
             connection_id: 设备连接ID
 
@@ -152,7 +154,11 @@ class DeviceManager:
         if self.is_connected:
             return False, "已有设备连接，请先断开"
 
-        result, device = eb.PvDevice.CreateAndConnect(connection_id)
+        # 创建 GigE Vision 设备对象
+        device = eb.PvDeviceGEV()
+
+        # 使用 Exclusive 模式连接，以获取完整的参数读写权限
+        result = device.Connect(connection_id, eb.PvAccessExclusive)
 
         if not result.IsOK():
             return False, f"连接失败: {result.GetCodeString()} - {result.GetDescription()}"
@@ -160,9 +166,22 @@ class DeviceManager:
         self._device = device
         self._connection_id = connection_id
 
-        # 如果是 GigE Vision 设备，协商包大小
-        if isinstance(device, eb.PvDeviceGEV):
-            device.NegotiatePacketSize()
+        # 检查并解锁 TLParamsLocked
+        params = device.GetParameters()
+        tl_locked = params.Get("TLParamsLocked")
+        if tl_locked:
+            result, locked_val = tl_locked.GetValue()
+            print(f"[DeviceManager] TLParamsLocked = {locked_val}")
+            if locked_val == 1:
+                # 尝试解锁
+                result = tl_locked.SetValue(0)
+                if result.IsOK():
+                    print("[DeviceManager] TLParamsLocked 已解锁")
+                else:
+                    print(f"[DeviceManager] 无法解锁 TLParamsLocked: {result.GetDescription()}")
+
+        # 协商包大小
+        device.NegotiatePacketSize()
 
         # 枚举流通道 (JAI FS/SW 双通道相机)
         self._enumerate_stream_channels()
@@ -180,8 +199,8 @@ class DeviceManager:
             return False, "没有已连接的设备"
 
         try:
-            # 释放设备
-            eb.PvDevice.Free(self._device)
+            # 断开设备连接
+            self._device.Disconnect()
             self._device = None
             self._connection_id = None
             self._sources = []
