@@ -9,8 +9,8 @@ from PySide6.QtWidgets import (
     QMenuBar, QMenu, QToolBar, QStatusBar, QLabel,
     QMessageBox, QFileDialog, QDockWidget
 )
-from PySide6.QtGui import QAction, QIcon, QKeySequence
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QAction, QIcon, QKeySequence, QDesktopServices
+from PySide6.QtCore import Qt, QTimer, QUrl
 
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -317,7 +317,16 @@ class MainWindow(QMainWindow):
         # 保存图像
         try:
             saved_files = self.image_saver.save_capture(rgb_data, nir_data)
-            self.statusbar.showMessage(f"已保存 {len(saved_files)} 个文件", 3000)
+
+            # 获取保存文件夹路径
+            if saved_files:
+                save_folder = os.path.dirname(saved_files[0])
+
+                # 在状态栏显示保存位置
+                self.statusbar.showMessage(f"已保存 {len(saved_files)} 个文件到: {save_folder}", 5000)
+
+                # 打开保存文件夹
+                QDesktopServices.openUrl(QUrl.fromLocalFile(save_folder))
         except Exception as e:
             QMessageBox.critical(self, "保存失败", f"保存图像时出错:\n{str(e)}")
 
